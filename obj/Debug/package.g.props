@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <PropertyGroup>
+    <PackageJsonName Condition="$(PackageJsonName) == ''">telegrambot</PackageJsonName>
+    <PackageJsonVersion Condition="$(PackageJsonVersion) == ''">1.0.0</PackageJsonVersion>
+    <PackageJsonMain Condition="$(PackageJsonMain) == ''">app.js</PackageJsonMain>
+    <PackageJsonScriptsDev Condition="$(PackageJsonScriptsDev) == ''">nodemon app.js</PackageJsonScriptsDev>
+    <PackageJsonScriptsStart Condition="$(PackageJsonScriptsStart) == ''">node app.js</PackageJsonScriptsStart>
+    <PackageJsonKeywords Condition="$(PackageJsonKeywords) == ''">[]</PackageJsonKeywords>
+    <PackageJsonAuthor Condition="$(PackageJsonAuthor) == ''"></PackageJsonAuthor>
+    <PackageJsonLicense Condition="$(PackageJsonLicense) == ''">ISC</PackageJsonLicense>
+    <PackageJsonDescription Condition="$(PackageJsonDescription) == ''"></PackageJsonDescription>
+    <PackageJsonDevdependenciesEslint Condition="$(PackageJsonDevdependenciesEslint) == ''">^9.25.1</PackageJsonDevdependenciesEslint>
+    <PackageJsonDependenciesNodeCron Condition="$(PackageJsonDependenciesNodeCron) == ''">^3.0.3</PackageJsonDependenciesNodeCron>
+    <PackageJsonDependenciesNodeTelegramBotApi Condition="$(PackageJsonDependenciesNodeTelegramBotApi) == ''">^0.66.0</PackageJsonDependenciesNodeTelegramBotApi>
+    <PackageJsonDependenciesNodemon Condition="$(PackageJsonDependenciesNodemon) == ''">^3.1.10</PackageJsonDependenciesNodemon>
+    <PackageJsonDependenciesPg Condition="$(PackageJsonDependenciesPg) == ''">^8.15.6</PackageJsonDependenciesPg>
+  </PropertyGroup>
+</Project>
