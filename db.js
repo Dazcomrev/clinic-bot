@@ -65,7 +65,7 @@ async function getClientAppoints(clientId) {
             to_char(Записи.Дата, 'YYYY-MM-DD') AS Дата, to_char(Расписание_врача.Время, 'HH24:MI') AS Время \
             FROM ((Врач INNER JOIN Расписание_врача ON Врач.id = Расписание_врача.id_врача) \
             INNER JOIN Записи ON Расписание_врача.id = Записи.id_расписания) INNER JOIN Специальность ON Врач.id_специальности = Специальность.id\
-            WHERE Записи.Имя_пользователя = $1", [clientId]);
+            WHERE Записи.id_пользователя = $1", [clientId]);
         return res.rows;
     } catch (err) {
         console.error('Ошибка при запросе к БД:', err);
@@ -90,7 +90,7 @@ async function makeAppoint(docId, date, time, clientId) {
             INNER JOIN Записи ON Расписание_врача.id = Записи.id_расписания) INNER JOIN Специальность ON Врач.id_специальности = Специальность.id\
             WHERE Врач.id = $1 AND Записи.Дата = $2 AND Записи.Статус = FALSE AND Расписание_врача.Время = $3::time;", [docId, date, time]);
 
-        const res = await pool.query("UPDATE Записи SET Статус = true, Имя_пользователя = $1 \
+        const res = await pool.query("UPDATE Записи SET Статус = true, id_пользователя = $1 \
             FROM Врач, Расписание_врача\
             WHERE Врач.id = Расписание_врача.id_врача AND Расписание_врача.id = Записи.id_расписания AND\
             Врач.id = $2 AND Записи.Дата = $3 AND Записи.Статус = FALSE AND Расписание_врача.Время = $4::time;", [clientId, docId, date, time]);
@@ -108,7 +108,7 @@ async function deleteAppoint(appointId) {
             FROM ((Врач INNER JOIN Расписание_врача ON Врач.id = Расписание_врача.id_врача) \
             INNER JOIN Записи ON Расписание_врача.id = Записи.id_расписания) INNER JOIN Специальность ON Врач.id_специальности = Специальность.id\
             WHERE Записи.id = $1", [appointId]);
-        const res = await pool.query("UPDATE Записи SET Статус = false, Имя_пользователя = NULL \
+        const res = await pool.query("UPDATE Записи SET Статус = false, id_пользователя = NULL \
             WHERE Записи.id = $1;", [appointId]);
         return [true, res0.rows];
     } catch (err) {
@@ -132,7 +132,7 @@ async function updateSchedule() {
         if (!stats.last_date) {
             await pool.query("SET lc_time = 'ru_RU.UTF-8';");
             //await pool.query('CREATE UNIQUE INDEX unique_schedule_date ON "Записи" ("id_расписания", "Дата");');
-            await pool.query("INSERT INTO Записи (id_расписания, Дата, Статус, Имя_пользователя)\
+            await pool.query("INSERT INTO Записи (id_расписания, Дата, Статус, id_пользователя)\
                 SELECT rv.id, d:: date, FALSE, NULL\
                 FROM public.Расписание_врача rv CROSS JOIN generate_series(CURRENT_DATE, CURRENT_DATE + INTERVAL '29 days', INTERVAL '1 day') d\
                 WHERE trim(to_char(d, 'TMDay')) = rv.День_недели\
@@ -166,7 +166,7 @@ async function updateSchedule() {
             INTERVAL '1 day'
           ) AS new_date
         )
-        INSERT INTO "Записи" ("id_расписания", "Дата", "Статус", "Имя_пользователя")
+        INSERT INTO "Записи" ("id_расписания", "Дата", "Статус", "id_пользователя")
         SELECT
             rv."id",
             d.new_date,
