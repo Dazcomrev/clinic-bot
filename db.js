@@ -10,6 +10,30 @@ const pool = new Pool({
     port: 5432,
 });
 
+async function getDoctorSpeciality(docId) {
+    try {
+        const res = await pool.query('SELECT Специальность.Название_специальности \
+            FROM Врач INNER JOIN Специальность ON Врач.id_специальности = Специальность.id \
+            WHERE Врач.id = $1', [docId]);
+        return res.rows[0]['Название_специальности'].toLowerCase();
+    } catch (err) {
+        console.error('Ошибка при запросе к БД:', err);
+        throw err;
+    }
+}
+
+async function getDoctorFIO(docId) {
+    try {
+        const res = await pool.query('SELECT Фамилия, Имя, Отчество \
+            FROM Врач INNER JOIN Специальность ON Врач.id_специальности = Специальность.id \
+            WHERE Врач.id = $1', [docId]);
+        return res.rows[0];
+    } catch (err) {
+        console.error('Ошибка при запросе к БД:', err);
+        throw err;
+    }
+}
+
 async function getDoctorsByAppoint(appoint) {
     try {
         const res = await pool.query('SELECT Врач.id, Фамилия, Имя, Отчество \
@@ -35,13 +59,13 @@ async function getTimesByDateAndDoctor(docId, date) {
     }
 }
 
-async function getClientAppoints(clientName) {
+async function getClientAppoints(clientId) {
     try {
         const res = await pool.query("SELECT Записи.id, Врач.Фамилия, Врач.Имя, Врач.Отчество, Специальность.Название_специальности,\
             to_char(Записи.Дата, 'YYYY-MM-DD') AS Дата, to_char(Расписание_врача.Время, 'HH24:MI') AS Время \
             FROM ((Врач INNER JOIN Расписание_врача ON Врач.id = Расписание_врача.id_врача) \
             INNER JOIN Записи ON Расписание_врача.id = Записи.id_расписания) INNER JOIN Специальность ON Врач.id_специальности = Специальность.id\
-            WHERE Записи.Имя_пользователя = $1", [clientName]);
+            WHERE Записи.Имя_пользователя = $1", [clientId]);
         return res.rows;
     } catch (err) {
         console.error('Ошибка при запросе к БД:', err);
@@ -49,7 +73,7 @@ async function getClientAppoints(clientName) {
     }
 }
 
-async function makeAppoint(docId, date, time, clientName) {
+async function makeAppoint(docId, date, time, clientId) {
     try {
         const status = await pool.query("SELECT Записи.Статус\
             FROM ((Врач INNER JOIN Расписание_врача ON Врач.id = Расписание_врача.id_врача) \
@@ -69,7 +93,7 @@ async function makeAppoint(docId, date, time, clientName) {
         const res = await pool.query("UPDATE Записи SET Статус = true, Имя_пользователя = $1 \
             FROM Врач, Расписание_врача\
             WHERE Врач.id = Расписание_врача.id_врача AND Расписание_врача.id = Записи.id_расписания AND\
-            Врач.id = $2 AND Записи.Дата = $3 AND Записи.Статус = FALSE AND Расписание_врача.Время = $4::time;", [clientName, docId, date, time]);
+            Врач.id = $2 AND Записи.Дата = $3 AND Записи.Статус = FALSE AND Расписание_врача.Время = $4::time;", [clientId, docId, date, time]);
         return [true, res0.rows];
     } catch (err) {
         console.error('Ошибка при запросе к БД:', err);
@@ -168,6 +192,8 @@ async function updateSchedule() {
 }
 
 export {
+    getDoctorSpeciality,
+    getDoctorFIO,
     getDoctorsByAppoint,
     getTimesByDateAndDoctor,
     getClientAppoints,
